@@ -152,9 +152,9 @@ public class Fish {
 			z = sumz >0?-2:2;
 			return;
 		}else{
-			x = rand.nextFloat()*4 - 2;
-			y = rand.nextFloat()*4 - 2;
-			z = rand.nextFloat()*4 - 2;
+			x = rand.nextFloat()*3.6f - 1.8f;
+			y = rand.nextFloat()*3.6f - 1.8f;
+			z = rand.nextFloat()*3.6f - 1.8f;
 		}
 	}
 

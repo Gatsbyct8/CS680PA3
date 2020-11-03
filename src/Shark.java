@@ -47,9 +47,9 @@ public class Shark {
 	public Shark(Vivarium _v) {
 		glut = new GLUT();
 		rand = new Random();
-		x = last_x = rand.nextFloat() * 4 - 2;
-		y = last_y = rand.nextFloat() * 4 - 2;
-		z = last_z = rand.nextFloat() * 4 - 2;
+		x = last_x = rand.nextFloat() * 3.6f - 1.8f;
+		y = last_y = rand.nextFloat() * 3.6f - 1.8f;
+		z = last_z = rand.nextFloat() * 3.6f - 1.8f;
 		shark_obj = tail_obj = body_obj = 0;
 		scale = 1.5f;
 		tail_speed = 1f;
