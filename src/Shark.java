@@ -35,7 +35,6 @@ public class Shark {
 	private float trans_speed_z;
 	
 	public float boundingSphereRadius;
-	private boolean showBoundingSphere;
 
 	private Random rand;
 	
@@ -62,7 +61,6 @@ public class Shark {
 		trans_speed_z = 0.005f;
 
 		boundingSphereRadius = 0.35f * scale;
-		showBoundingSphere = false;
 		
 		v = _v;
 		prey = v.getFish();

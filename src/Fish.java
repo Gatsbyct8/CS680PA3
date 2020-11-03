@@ -33,10 +33,6 @@ public class Fish {
 	private float trans_speed_y;
 	private float trans_speed_z;
 	
-	private float sharkPotentialScalar;
-	private float wallPotentialScalar;
-	private float foodPotentialScalar;
-	
 	public float boundingSphereRadius;
 	private boolean showBoundingSphere;
 	private float []rotationMatrix;
@@ -70,11 +66,7 @@ public class Fish {
 		trans_speed_x = 0.005f;
 		trans_speed_y = 0.005f;
 		trans_speed_z = 0.005f;
-		
-		sharkPotentialScalar = 0.25f;
-		wallPotentialScalar = 0.1f;
-		foodPotentialScalar = -0.2f;
-		
+
 		boundingSphereRadius = 0.35f;
 		showBoundingSphere = false;
 		
@@ -155,9 +147,9 @@ public class Fish {
 			sumx /= shark.size();
 			sumy /= shark.size();
 			sumz /= shark.size();
-			x = sumx>0?-2:2;
-			y = sumy>0?-2:2;
-			z = sumz>0?-2:2;
+			x = sumx >0?-2:2;
+			y = sumy >0?-2:2;
+			z = sumz >0?-2:2;
 			return;
 		}else{
 			x = rand.nextFloat()*4 - 2;
