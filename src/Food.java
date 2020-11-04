@@ -1,7 +1,7 @@
 /*
  * Food.java
  * 
- * Tian Chen - ct970808@bu.edu
+ * Tian Chen - ct970808@bu.edu 11/4/2020
  * 
  * OpenGL object that draws food as a brown sphere.
  * Dropped from a random x and z point and falls to the
@@ -47,9 +47,9 @@ public class Food {
 	}
 	
 	public void update(GL2 gl) {
-//		if (y > -1.875f) {
-//			y -= speed;
-//		}
+		if (y > -1.875f) {
+			y -= speed;
+		}
 	}
 	
 	public void draw(GL2 gl) {

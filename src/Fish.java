@@ -1,7 +1,7 @@
 /*
  * Fish.java
  * 
- * William Kranich - wkranich@bu.edu
+ * Tian Chen - ct970808@bu.edu 11/4/2020
  * 
  * Object for an OpenGL fish that moves along 3 axes of a tank,
  * avoids Sharks, and "eats" food.
@@ -123,8 +123,16 @@ public class Fish {
 				orientation.y = y - last_y;
 				orientation.z = z - last_z;
 			} else {
-				if (distance(new Coord(x, y, z), new Coord(last_x, last_y, last_z)) < 0.5) {
+				if (v.getShark().size()!=0){
 					potentialFunction(this, v.getFish(), v.getShark());
+				}
+				else if (distance(new Coord(x, y, z), new Coord(last_x, last_y, last_z)) < 0.5) {
+					x = rand.nextFloat()*3.6f - 1.8f;
+					y = rand.nextFloat()*3.6f - 1.8f;
+					z = rand.nextFloat()*3.6f - 1.8f;
+					orientation.x = x - last_x;
+					orientation.y = y - last_y;
+					orientation.z = z - last_z;
 				}
 			}
 		}
@@ -138,34 +146,40 @@ public class Fish {
 		cal_angle_and_translate_matrix(gl);
 	}
 
+	private Coord potentialFunction(Coord p, Coord q1, float scale) {
+		float x = (float) (scale*(p.x - q1.x)*Math.pow(Math.E,-1*(Math.pow((p.x-q1.x), 2) + Math.pow((p.y-q1.y), 2) + Math.pow((p.z-q1.z), 2)) ));
+		float y = (float) (scale*(p.y - q1.y)*Math.pow(Math.E,-1*(Math.pow((p.x-q1.x), 2) + Math.pow((p.y-q1.y), 2) + Math.pow((p.z-q1.z), 2)) ));
+		float z = (float) (scale*(p.z - q1.z)*Math.pow(Math.E,-1*(Math.pow((p.x-q1.x), 2) + Math.pow((p.y-q1.y), 2) + Math.pow((p.z-q1.z), 2)) ));
+		Coord potential = new Coord(x, y, z);
+		return potential;
+	}
+
 	private void potentialFunction(Fish fish, List<Fish> fish1, List<Shark> shark) {
-		float sumx = 0f;
+		if (shark.size()!=0){
+			float sumx = 0f;
 		float sumy = 0f;
 		float sumz = 0f;
 		for (Shark s: shark){
-			sumx += (s.last_x);
-			sumy += (s.last_y);
-			sumz += (s.last_z);
+			Coord coord = potentialFunction(new Coord(last_x,last_y,last_z),new Coord(s.last_x,s.last_y,s.last_z),1.25f);
+			sumx += coord.x;
+			sumy += coord.y;
+			sumz += coord.z;
 		}
-		if (shark.size()!=0) {
 			sumx /= shark.size();
 			sumy /= shark.size();
 			sumz /= shark.size();
-			x = sumx >0?-2:2;
-			y = sumy >0?-2:2;
-			z = sumz >0?-2:2;
+			if (sumx+last_x >-2 && sumx+last_x <2)
+			x = sumx+last_x;
+			if (sumy+last_y >-2 && sumy+last_y <2)
+			y = sumy+last_y;
+			if (sumz+last_z >-2 && sumz+last_z <2)
+			z = sumz+last_z;
 			orientation.x = x - last_x;
 			orientation.y = y - last_y;
 			orientation.z = z - last_z;
 			return;
-		}else{
-			x = rand.nextFloat()*3.6f - 1.8f;
-			y = rand.nextFloat()*3.6f - 1.8f;
-			z = rand.nextFloat()*3.6f - 1.8f;
-			orientation.x = x - last_x;
-			orientation.y = y - last_y;
-			orientation.z = z - last_z;
 		}
+
 	}
 
 	private void changeOrientation() {
@@ -294,9 +308,9 @@ public class Fish {
 			}
 		}
 		else {
-			last_x += trans_speed_x * (x - last_x);
-			last_y += trans_speed_y * (y - last_y);
-			last_z += trans_speed_z * (z - last_z);
+				last_x += trans_speed_x * (x - last_x);
+				last_y += trans_speed_y * (y - last_y);
+				last_z += trans_speed_z * (z - last_z);
 		}
 	}
 	

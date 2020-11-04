@@ -1,4 +1,10 @@
-
+/*
+ * Coord.java
+ *
+ * Tian Chen - ct970808@bu.edu 11/4/2020
+ *
+ * used to calculate coordinate
+ */
 
 public class Coord
 {

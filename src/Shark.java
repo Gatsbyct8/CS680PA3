@@ -1,7 +1,7 @@
 /*
  * Shark.java
  * 
- * William Kranich - wkranich@bu.edu
+ * Tian Chen - ct970808@bu.edu 11/4/2020
  * 
  * Object for an OpenGL shark that moves along 3 axes of a tank,
  * attacks fish and "eats" food, but doesn't go after food.
@@ -94,7 +94,6 @@ public class Shark {
 		gl.glPushMatrix();
 		gl.glPushAttrib(gl.GL_CURRENT_BIT);
 		gl.glMultMatrixf(rotationMatrix, 0);
-		//gl.glRotatef(90,0f,1f,0f);
 		// Rotate tail
 		gl.glPushMatrix();
 		gl.glRotatef(tail_angle, 0, 1, 0);
@@ -120,6 +119,24 @@ public class Shark {
 	}
 
 	public void update(GL2 gl) {
+		for (Shark shark : v.getShark()) {
+			if (shark != this){
+				if (distance(new Coord(shark.last_x,shark.last_y,shark.last_z), new Coord(last_x,last_y,last_z)) < 0.5){
+					x = -x;
+					y = -y;
+					z = -z;
+					orientation.x = x - last_x;
+					orientation.y = y - last_y;
+					orientation.z = z - last_z;
+					shark.x = -shark.x;
+					shark.y = -shark.y;
+					shark.z = -shark.z;
+					shark.orientation.x = x - last_x;
+					shark.orientation.y = y - last_y;
+					shark.orientation.z = z - last_z;
+				}
+			}
+		}
 		boolean hasFish = false;
 		if (prey.size()!=0) {
 			for (Fish fish: prey) {
@@ -206,17 +223,6 @@ public class Shark {
 		gl.glTranslatef(0, 0, 0.35f);
 		gl.glRotatef(-180, 0, 1, 0);
 		glut.glutSolidCone(0.1, 0.35, 20, 20);
-		int circle_points = 100;
-		// create end cap, adapted from OpenGL red book example 2-4 on drawing
-		// circles
-		gl.glBegin(gl.GL_POLYGON);
-		double angle;
-		for (int i = 0; i < circle_points; i++) {
-			angle = 2 * Math.PI * i / circle_points;
-			gl.glVertex2f((float) Math.cos(angle) * 0.1f,
-					(float) Math.sin(angle) * 0.1f);
-		}
-		gl.glEnd();
 		gl.glPopMatrix();
 		gl.glEndList();
 	}
@@ -259,38 +265,14 @@ public class Shark {
 			}
 		}
 	}
+
 	
 	// Move the fish around the tank using a combination of potential functions
 	// and flipping directions when about to leave tank.
 	private void translate() {
-		for (Shark shark : v.getShark()) {
-			if (shark != this){
-				while (distance(new Coord(shark.last_x,shark.last_y,shark.last_z), new Coord(last_x,last_y,last_z)) < 0.2){
-					x = rand.nextFloat()*4 - 2;
-					y = rand.nextFloat()*4 - 2;
-					z = rand.nextFloat()*4 - 2;
-					orientation.x = x - last_x;
-					orientation.y = y - last_y;
-					orientation.z = z - last_z;
-					shark.x = rand.nextFloat()*4 - 2;
-					shark.y = rand.nextFloat()*4 - 2;
-					shark.z = rand.nextFloat()*4 - 2;
-					shark.orientation.x = x - last_x;
-					shark.orientation.y = y - last_y;
-					shark.orientation.z = z - last_z;
-					last_x += trans_speed_x * (x - last_x)>0?trans_speed_x:-trans_speed_x;
-					last_y += trans_speed_y * (y - last_y)>0?trans_speed_x:-trans_speed_x;
-					last_z += trans_speed_z * (z - last_z)>0?trans_speed_x:-trans_speed_x;
-					shark.last_x += trans_speed_x * (shark.x - shark.last_x)>0?trans_speed_x:-trans_speed_x;
-					shark.last_y += trans_speed_y * (shark.y - shark.last_y)>0?trans_speed_x:-trans_speed_x;
-					shark.last_z += trans_speed_z * (shark.z - shark.last_z)>0?trans_speed_x:-trans_speed_x;
-				}
-			}
-		}
-		last_x += trans_speed_x * (x - last_x);
-		last_y += trans_speed_y * (y - last_y);
-		last_z += trans_speed_z * (z - last_z);
-
+			last_x += trans_speed_x * (x - last_x);
+			last_y += trans_speed_y * (y - last_y);
+			last_z += trans_speed_z * (z - last_z);
 	}
 	
 	// Coord helper functions

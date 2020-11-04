@@ -1,4 +1,10 @@
-
+/*
+ * Tank.java
+ *
+ * Tian Chen - ct970808@bu.edu 11/4/2020
+ *
+ * The space for our model to move
+ */
 
 import java.nio.*; // for the byteBuffer
 

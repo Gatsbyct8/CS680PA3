@@ -1,4 +1,10 @@
-
+/*
+ * Vivarium.java
+ *
+ * Tian Chen - ct970808@bu.edu 11/4/2020
+ *
+ * Used to add model
+ */
 
 import javax.media.opengl.*;
 import com.jogamp.opengl.util.*;
