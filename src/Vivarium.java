@@ -36,17 +36,6 @@ public class Vivarium
   {
     tank.init( gl );
     this.gl = gl;
-    //Food food = new Food();
-    //foodList.add(food);
-    //for (Food f : foodList){
-      //f.init( gl );
-    //}
-    //Fish fish = new Fish(this);
-    //Shark shark = new Shark(this);
-    //fish.init(gl);
-    //shark.init(gl);
-    //fishList.add(fish);
-    //sharkList.add(shark);
   }
 
   public void update( GL2 gl )

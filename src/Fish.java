@@ -20,9 +20,9 @@ public class Fish {
 	private int fish_obj;
 	private int tail_obj;
 	private int body_obj;
-	private int box_obj;
+	private Coord direction;
+	private Coord orientation;
 
-	private float scale;
 	public boolean dead;
 
 	private float tail_angle;
@@ -34,7 +34,6 @@ public class Fish {
 	private float trans_speed_z;
 	
 	public float boundingSphereRadius;
-	private boolean showBoundingSphere;
 	private float []rotationMatrix;
 	private boolean flag = false;
 	
@@ -59,7 +58,6 @@ public class Fish {
 		y = last_y = rand.nextFloat() * 4 - 2;
 		z = last_z = rand.nextFloat() * 4 - 2;
 		fish_obj = tail_obj = body_obj = 0;
-		scale = 0.35f;
 		tail_speed = 1f;
 		tail_angle = 0;
 		tail_direction = 1;
@@ -68,12 +66,18 @@ public class Fish {
 		trans_speed_z = 0.005f;
 
 		boundingSphereRadius = 0.35f;
-		showBoundingSphere = false;
 		
 		v = _v;
 		predator = v.getShark();
 
 		dead = false;
+		direction = new Coord(0,0,-1);
+		orientation = new Coord(0,0,-1);
+		rotationMatrix = new float[]
+							{1, 0, 0, 0.0f,
+							0, 1, 0, 0.0f,
+							0, 0, 1, 0.0f,
+							last_x, last_y, last_z, 1.0f};
 	}
 
 	public void init(GL2 gl) {
@@ -89,9 +93,6 @@ public class Fish {
 		gl.glPushMatrix();
 		gl.glPushAttrib(gl.GL_CURRENT_BIT);
 		gl.glMultMatrixf(rotationMatrix, 0);
-		//gl.glRotatef(90,1f,0f,0f);
-		gl.glRotatef(90,0f,1f,0f);
-		//gl.glRotatef(90,0f,0f,1f);
 		if (dead) {
 			gl.glRotatef(-90, 0, 0, 1);
 		}
@@ -118,6 +119,9 @@ public class Fish {
 				x = v.getFoodList().get(0).x;
 				y = v.getFoodList().get(0).y;
 				z = v.getFoodList().get(0).z;
+				orientation.x = x - last_x;
+				orientation.y = y - last_y;
+				orientation.z = z - last_z;
 			} else {
 				if (distance(new Coord(x, y, z), new Coord(last_x, last_y, last_z)) < 0.5) {
 					potentialFunction(this, v.getFish(), v.getShark());
@@ -150,12 +154,49 @@ public class Fish {
 			x = sumx >0?-2:2;
 			y = sumy >0?-2:2;
 			z = sumz >0?-2:2;
+			orientation.x = x - last_x;
+			orientation.y = y - last_y;
+			orientation.z = z - last_z;
 			return;
 		}else{
 			x = rand.nextFloat()*3.6f - 1.8f;
 			y = rand.nextFloat()*3.6f - 1.8f;
 			z = rand.nextFloat()*3.6f - 1.8f;
+			orientation.x = x - last_x;
+			orientation.y = y - last_y;
+			orientation.z = z - last_z;
 		}
+	}
+
+	private void changeOrientation() {
+		// use the cross product to get rotation axis
+		Coord axis = new Coord();
+		direction.normalize();
+		orientation.normalize();
+		axis.x = - orientation.y * direction.z + orientation.z * direction.y;
+		axis.y = - orientation.z * direction.x + orientation.x * direction.z;
+		axis.z = - orientation.x * direction.y + orientation.y * direction.x;
+		if (axis.x == 0 && axis.y == 0 && axis.z == 0){
+			rotationMatrix[12] = last_x;
+			rotationMatrix[13] = last_y;
+			rotationMatrix[14] = last_z;
+			return;
+		}
+		axis.normalize();
+
+		// use the dot product to get the rotation angle
+		double theta = Math.acos(orientation.x * direction.x + orientation.y * direction.y + orientation.z * direction.z);
+
+		// Create the rotation quaternion
+		float cosTheta2 = (float) Math.cos(theta / 2);
+		float sinTheta2 = (float) Math.sin(theta / 2);
+		Quaternion rotation = new Quaternion(cosTheta2, sinTheta2 * (float) axis.x, sinTheta2 * (float) axis.y, sinTheta2 * (float) axis.z);
+
+		// get the rotation matrix and rotate
+		rotationMatrix = rotation.to_matrix();
+		rotationMatrix[12] = last_x;
+		rotationMatrix[13] = last_y;
+		rotationMatrix[14] = last_z;
 	}
 
 	private void cal_angle_and_translate_matrix(GL2 gl) {
@@ -167,21 +208,7 @@ public class Fish {
 							last_x, last_y, last_z, 1.0f};
 			return;
 		}
-		float dx = last_x - x;
-		float dy = 0f;
-		float dz = last_z - z;
-
-		float mag = (float) Math.sqrt(dx * dx + dz * dz);
-		float[] v = new float[3];
-		v[0] = dx / mag;
-		v[1] = 0;
-		v[2] = dz / mag;
-
-		rotationMatrix = new float[]
-				{v[0], 0, v[2], 0.0f,
-				0, 1, 0, 0.0f,
-				-v[2], 0, v[0], 0.0f,
-				last_x, last_y, last_z, 1.0f};
+		changeOrientation();
 	}
 	
 	private void createBody(GL2 gl) {

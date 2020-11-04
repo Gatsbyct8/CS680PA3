@@ -20,7 +20,8 @@ public class Shark {
 	private int tail_obj;
 	private int body_obj;
 	private int fin_obj;
-	private int box_obj;
+	private Coord direction;
+	private Coord orientation;
 
 	public float scale;
 
@@ -64,6 +65,14 @@ public class Shark {
 		
 		v = _v;
 		prey = v.getFish();
+
+		direction = new Coord(0,0,-1);
+		orientation = new Coord(0,0,-1);
+		rotationMatrix = new float[]
+				{1, 0, 0, 0.0f,
+						0, 1, 0, 0.0f,
+						0, 0, 1, 0.0f,
+						last_x, last_y, last_z, 1.0f};
 	}
 
 	public void init(GL2 gl) {
@@ -85,7 +94,7 @@ public class Shark {
 		gl.glPushMatrix();
 		gl.glPushAttrib(gl.GL_CURRENT_BIT);
 		gl.glMultMatrixf(rotationMatrix, 0);
-		gl.glRotatef(90,0f,1f,0f);
+		//gl.glRotatef(90,0f,1f,0f);
 		// Rotate tail
 		gl.glPushMatrix();
 		gl.glRotatef(tail_angle, 0, 1, 0);
@@ -118,15 +127,21 @@ public class Shark {
 					x = fish.last_x;
 					y = fish.last_y;
 					z = fish.last_z;
+					orientation.x = x - last_x;
+					orientation.y = y - last_y;
+					orientation.z = z - last_z;
 					hasFish = true;
 				}
 			}
 		}
 		if (hasFish == false){
-			if(distance(new Coord(x,y,z),new Coord(last_x,last_y,last_z))<0.5) {
+			if(distance(new Coord(x,y,z),new Coord(last_x,last_y,last_z))<0.2) {
 				x = rand.nextFloat()*4-2;
 				y = rand.nextFloat()*4-2;
 				z = rand.nextFloat()*4-2;
+				orientation.x = x - last_x;
+				orientation.y = y - last_y;
+				orientation.z = z - last_z;
 			}
 		}
 		calcDistances(gl);
@@ -135,23 +150,39 @@ public class Shark {
 		cal_angle_and_translate_matrix(gl);
 	}
 
+	private void changeOrientation() {
+		// use the cross product to get rotation axis
+		Coord axis = new Coord();
+		direction.normalize();
+		orientation.normalize();
+		axis.x = - orientation.y * direction.z + orientation.z * direction.y;
+		axis.y = - orientation.z * direction.x + orientation.x * direction.z;
+		axis.z = - orientation.x * direction.y + orientation.y * direction.x;
+		if (axis.x == 0 && axis.y == 0 && axis.z == 0){
+			rotationMatrix[12] = last_x;
+			rotationMatrix[13] = last_y;
+			rotationMatrix[14] = last_z;
+			return;
+		}
+		axis.normalize();
+
+		// use the dot product to get the rotation angle
+		double theta = Math.acos(orientation.x * direction.x + orientation.y * direction.y + orientation.z * direction.z);
+
+		// Create the rotation quaternion
+		float cosTheta2 = (float) Math.cos(theta / 2);
+		float sinTheta2 = (float) Math.sin(theta / 2);
+		Quaternion rotation = new Quaternion(cosTheta2, sinTheta2 * (float) axis.x, sinTheta2 * (float) axis.y, sinTheta2 * (float) axis.z);
+
+		// get the rotation matrix and rotate
+		rotationMatrix = rotation.to_matrix();
+		rotationMatrix[12] = last_x;
+		rotationMatrix[13] = last_y;
+		rotationMatrix[14] = last_z;
+	}
+
 	private void cal_angle_and_translate_matrix(GL2 gl) {
-
-		float dx = last_x - x;
-		float dy = 0f;
-		float dz = last_z - z;
-
-		float mag = (float) Math.sqrt(dx * dx + dz * dz);
-		float[] v = new float[3];
-		v[0] = dx / mag;
-		v[1] = 0;
-		v[2] = dz / mag;
-
-		rotationMatrix = new float[]
-				{v[0], 0, v[2], 0.0f,
-						0, 1, 0, 0.0f,
-						-v[2], 0, v[0], 0.0f,
-						last_x, last_y, last_z, 1.0f};
+		changeOrientation();
 	}
 	
 	private void createBody(GL2 gl) {
@@ -232,21 +263,27 @@ public class Shark {
 	// Move the fish around the tank using a combination of potential functions
 	// and flipping directions when about to leave tank.
 	private void translate() {
-		for (Shark fish : v.getShark()) {
-			if (fish != this){
-				while (distance(new Coord(fish.last_x,fish.last_y,fish.last_z), new Coord(last_x,last_y,last_z)) < 0.5){
+		for (Shark shark : v.getShark()) {
+			if (shark != this){
+				while (distance(new Coord(shark.last_x,shark.last_y,shark.last_z), new Coord(last_x,last_y,last_z)) < 0.2){
 					x = rand.nextFloat()*4 - 2;
 					y = rand.nextFloat()*4 - 2;
 					z = rand.nextFloat()*4 - 2;
-					fish.x = rand.nextFloat()*4 - 2;
-					fish.y = rand.nextFloat()*4 - 2;
-					fish.z = rand.nextFloat()*4 - 2;
+					orientation.x = x - last_x;
+					orientation.y = y - last_y;
+					orientation.z = z - last_z;
+					shark.x = rand.nextFloat()*4 - 2;
+					shark.y = rand.nextFloat()*4 - 2;
+					shark.z = rand.nextFloat()*4 - 2;
+					shark.orientation.x = x - last_x;
+					shark.orientation.y = y - last_y;
+					shark.orientation.z = z - last_z;
 					last_x += trans_speed_x * (x - last_x)>0?trans_speed_x:-trans_speed_x;
 					last_y += trans_speed_y * (y - last_y)>0?trans_speed_x:-trans_speed_x;
 					last_z += trans_speed_z * (z - last_z)>0?trans_speed_x:-trans_speed_x;
-					fish.last_x += trans_speed_x * (fish.x - fish.last_x)>0?trans_speed_x:-trans_speed_x;
-					fish.last_y += trans_speed_y * (fish.y - fish.last_y)>0?trans_speed_x:-trans_speed_x;
-					fish.last_z += trans_speed_z * (fish.z - fish.last_z)>0?trans_speed_x:-trans_speed_x;
+					shark.last_x += trans_speed_x * (shark.x - shark.last_x)>0?trans_speed_x:-trans_speed_x;
+					shark.last_y += trans_speed_y * (shark.y - shark.last_y)>0?trans_speed_x:-trans_speed_x;
+					shark.last_z += trans_speed_z * (shark.z - shark.last_z)>0?trans_speed_x:-trans_speed_x;
 				}
 			}
 		}

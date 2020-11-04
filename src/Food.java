@@ -47,9 +47,9 @@ public class Food {
 	}
 	
 	public void update(GL2 gl) {
-		if (y > -1.875f) {
-			y -= speed;
-		}
+//		if (y > -1.875f) {
+//			y -= speed;
+//		}
 	}
 	
 	public void draw(GL2 gl) {

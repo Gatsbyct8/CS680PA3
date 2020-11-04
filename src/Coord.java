@@ -15,4 +15,11 @@ public class Coord
     y = _y;
     z = _z;
   }
+
+  public void normalize() {
+    double sum = Math.sqrt(x*x+y*y+z*z);
+    x= x/sum;
+    y= y/sum;
+    z= z/sum;
+  }
 }
